@@ -57,9 +57,9 @@ function buyProduct(){
                             if(err) throw err;
                             // console.log(res);
                             if(buyQuant > 1){
-                                console.log('Thank you for your purchase of ' + buyQuant + ' ' + name + "'s" + ' for $' + cost + '. Have a great day :)');
+                                console.log('Thank you for your purchase of '+buyQuant+' '+name+"'s"+' for $'+cost+'. Have a great day :)');
                             }else{
-                                console.log('Thank you for your purchase of ' + buyQuant + ' ' + name + ' for $' + cost + '. Have a great day :)');
+                                console.log('Thank you for your purchase of '+buyQuant+' '+name+' for $'+cost+'. Have a great day :)');
                             }
                         }
                     );

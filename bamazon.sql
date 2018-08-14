@@ -3,7 +3,7 @@ CREATE DATABASE bamazon;
 USE bamazon;
 
 CREATE TABLE products (
-    id INT AUTO_INCREMENT NOT NULL,
+    id AUTO_INCREMENT NOT NULL,
     product VARCHAR(255) NOT NULL,
     department VARCHAR(255) NOT NULL,
     price DECIMAL(10,2) NOT NULL,
@@ -21,8 +21,8 @@ SELECT id,product,price
 FROM products;
 
 UPDATE products
-SET product = 'Captain America POP'
-WHERE id = 10;
+SET product = "The North Face Men's Borealis 18 Backpack"
+WHERE id = 13;
 
 UPDATE products
 SET quantity = 50
