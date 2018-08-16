@@ -1,5 +1,6 @@
 var mysql = require('mysql');
 var inquirer = require('inquirer');
+const cTable = require('console.table');
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -15,10 +16,13 @@ connection.connect(function(err) {
   
   connection.query("SELECT id,product,price FROM products", function(err, res) {
     if (err) throw err;
-    console.log(res);
+    console.table(res);
     buyProduct();
   });
 });
+
+var purchases = [];
+var totalCost = 0.00;
 
 function buyProduct(){
     inquirer.prompt([{
@@ -46,24 +50,33 @@ function buyProduct(){
                     var newQuant = res[0].quantity -= buyQuant;
                     var name = res[0].product;
                     var cost = res[0].price * buyQuant;
-                    connection.query(
-                        "UPDATE products SET ? WHERE ?",[
-                        {
-                            quantity: newQuant
-                        },
-                        {
-                            id: data.product_id
-                        }],function(err,res){
+                    if (buyQuant>1){
+                        purchases.push(' '+buyQuant+' '+name+"'s");
+                    }else{
+                        purchases.push(' '+buyQuant+' '+name);
+                    }
+                    totalCost += cost;
+                    var query = connection.query({
+                        sql: "UPDATE products SET quantity=?, product_sales=? WHERE id=?",
+                        values: [newQuant, cost, data.product_id]
+                        },function(err,res){
                             if(err) throw err;
                             // console.log(res);
-                            if(buyQuant > 1){
-                                console.log('Thank you for your purchase of '+buyQuant+' '+name+"'s"+' for $'+cost+'. Have a great day :)');
-                            }else{
-                                console.log('Thank you for your purchase of '+buyQuant+' '+name+' for $'+cost+'. Have a great day :)');
+                            inquirer.prompt([{
+                                type: 'confirm',
+                                name: 'done_shopping',
+                                message: 'Is there anything else you would like to purchase?'
                             }
+                            ]).then(function(data){
+                                if(data.done_shopping === true){
+                                    buyProduct();
+                                }else{
+                                    console.log('Thank you for your purchase of'+purchases+' for $'+totalCost+'. Have a great day :)');
+                                    connection.end();
+                                }
+                            });
                         }
                     );
-                    connection.end();
                 }
             }
         );

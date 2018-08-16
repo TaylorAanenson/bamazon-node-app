@@ -1,5 +1,6 @@
 var mysql = require('mysql');
 var inquirer = require('inquirer');
+const cTable = require('console.table');
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -17,7 +18,7 @@ connection.connect(function connecter(err) {
     message: 'Please enter password'
     }
     ]).then(function(data){
-        if(data.pass === 'bamaman'){
+        if(data.pass === 'bm'){
             var timer = setInterval(initializer,1000);
             console.log("Initializing interface.. ");
             function initializer(){
@@ -37,29 +38,24 @@ function manageProducts(){
     inquirer.prompt([{
         type: 'list',
         name: 'action',
-        choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product']
+        choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product','Exit']
     }
     ]).then(function(data){
         if(data.action === 'View Products for Sale'){
             connection.query("SELECT * FROM products", function(err, res) {
                 if (err) throw err;
-                for (i in res){
-                    console.log(res[i]);
-                }
-                connection.end();
+                console.table(res);
+                manageProducts();
                 });
         }else if(data.action === 'View Low Inventory'){
             connection.query("SELECT * FROM products", function(err, res) {
                 if (err) throw err;
                 for (i in res){
-                    var quant = res[i].quantity;
-                    if(quant < 5){
-                        console.log(res[i]);
-                    }else{
-                        console.log('Quants are all good! :)')
+                    if(res[i].quantity < 5){
+                        console.table(res[i]);
                     }
                 }
-                connection.end();
+                manageProducts();
                 });
         }else if(data.action === 'Add to Inventory'){
             var timer;
@@ -69,9 +65,7 @@ function manageProducts(){
             timer = setInterval(addInventory,100);
             connection.query("SELECT * FROM products", function(err, res) {
                 if (err) throw err;
-                for (i in res){
-                    console.log(res[i]);
-                }
+                    console.table(res);
             });
             function addInventory(){
                 clearInterval(timer);
@@ -86,7 +80,7 @@ function manageProducts(){
                             id: data.product_id,
                         },function(err,res){
                             if(err) throw err;
-                            console.log(res[0]);
+                            console.table(res[0]);
                             selectedID = res[0].id;
                             selectedName = res[0].product;
                             selectedQuant = parseFloat(res[0].quantity);
@@ -117,20 +111,15 @@ function manageProducts(){
                         }
                     ]).then(function(data){
                         if(data.action === true){
-                            connection.query(
-                                "UPDATE products SET ? WHERE ?",[
-                                {
-                                    quantity: newQuant
-                                },
-                                {
-                                    id: selectedID
-                                }],
-                                function(err, res) {
+                            connection.query({
+                                sql: "UPDATE products SET quantity=? WHERE id=?",
+                                values: [newQuant,selectedID],
+                            },function(err, res) {
                                     if(err) throw err;
                                     console.log(selectedName+' has been updated to '+newQuant);
+                                    manageProducts();
                                 }
                             );
-                            connection.end();
                         }else{
                             confirmID();
                         }
@@ -159,6 +148,11 @@ function manageProducts(){
                 },
                 {
                     type: 'input',
+                    name: 'department_id',
+                    message: 'What is the departments ID number?'
+                },
+                {
+                    type: 'input',
                     name: 'product_price',
                     message: 'What price is it going to be listed at?'
                 },
@@ -168,8 +162,9 @@ function manageProducts(){
                     message: 'How many are we going to have in stock?'
                 }
                 ]).then(function(data){
-                    var name = JSON.stringify(data.product_name);
-                    var depart = JSON.stringify(data.product_department);
+                    var name = data.product_name;
+                    var id = data.department_id;
+                    var depart = data.product_department;
                     var price = parseFloat(data.product_price);
                     var quant = parseFloat(data.product_quantity);
                     inquirer.prompt([{
@@ -179,19 +174,22 @@ function manageProducts(){
                     }
                     ]).then(function (data){
                         if(data.action === true){
-                            var query = connection.query(
-                                "INSERT INTO products (product,department,price,quantity) VALUES ("+name+","+depart+","+price+","+quant+")"
-                                ,function(err,res){
+                            connection.query({
+                                sql: "INSERT INTO products (product,department_id,department,price,quantity) VALUES (?,?,?,?,?)",
+                                values: [name,id,depart,price,quant],
+                                },function(err,res){
                                     if(err) throw err;
                                     console.log('Product inserted successfully');
+                                    manageProducts();
                                 });
-                                connection.end();
                         }else{
                             addProduct();
                         }
                     });
                 });
             }
+        }else if(data.action === 'Exit'){
+            connection.end();
         }
     });
 }
