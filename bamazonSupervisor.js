@@ -44,11 +44,7 @@ function superviseDepartments(){
         if(data.action === 'View Product Sales by Department'){
             connection.query("SELECT departments.department_id, department_name, over_head_costs, SUM(product_sales) AS product_sales, (SUM(product_sales)-over_head_costs) AS total_profits FROM departments LEFT JOIN products ON products.department_id = departments.department_id GROUP BY department_name", function(err, res) {
                 if (err) throw err;
-                // for (i in res){
-                    // var prof = parseFloat(res[i].over_head_costs)-parseFloat(res[i].product_sales);
-                    // console.log(parseFloat(res[i].over_head_costs)-parseFloat(res[i].product_sales));
                     console.table(res);
-                // }
                 superviseDepartments();
                 });
         }else if(data.action === 'Create New Department'){

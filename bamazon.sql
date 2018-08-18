@@ -44,7 +44,7 @@ ALTER TABLE products
 ADD product_sales DECIMAL(10,2) NOT NULL DEFAULT 0;
 
 ALTER TABLE products
-ADD department_id INT NOT NULL AFTER product;
+ADD department_id INT NOT NULL, AFTER product;
 
 UPDATE products
 SET department_id = 4
@@ -75,19 +75,14 @@ LEFT JOIN products
 ON products.id = departments.department_id
 GROUP BY department_id;
 
-SELECT *
-FROM departments
-RIGHT JOIN (SELECT departments.*, over_head_costs - product_sales AS total_profits FROM departments,products WHERE department_id = products.id GROUP BY department_id)departments
-ON products.id = departments.department_id;
-
 SELECT ANY_VALUE(departments.department_id), ANY_VALUE(departments.department_name), ANY_VALUE(departments.over_head_costs), SUM(products.product_sales)
 FROM products
 RIGHT JOIN departments
 ON products.id = departments.department_id
 GROUP BY department;
 
-SELECT departments.department_id, department_name, over_head_costs, SUM(product_sales) AS product_sales
-FROM products
-LEFT JOIN departments
+SELECT departments.department_id, department_name, over_head_costs, SUM(product_sales) AS product_sales, (SUM(product_sales)-over_head_costs) AS total_profits
+FROM departments
+LEFT JOIN products
 ON products.department_id = departments.department_id
-GROUP BY department;
+GROUP BY department_name;

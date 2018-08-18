@@ -22,7 +22,7 @@ connection.connect(function(err) {
 });
 
 var purchases = [];
-var totalCost = 0.00;
+var totalCost = 0;
 
 function buyProduct(){
     inquirer.prompt([{
@@ -49,19 +49,20 @@ function buyProduct(){
                 }else{
                     var newQuant = res[0].quantity -= buyQuant;
                     var name = res[0].product;
+                    var sales = res[0].product_sales;
                     var cost = res[0].price * buyQuant;
+                    var salesTotal = cost + sales;
                     if (buyQuant>1){
                         purchases.push(' '+buyQuant+' '+name+"'s");
                     }else{
                         purchases.push(' '+buyQuant+' '+name);
                     }
-                    totalCost += cost;
-                    var query = connection.query({
+                    var decimalCost = +((totalCost += cost).toFixed(2));
+                    connection.query({
                         sql: "UPDATE products SET quantity=?, product_sales=? WHERE id=?",
-                        values: [newQuant, cost, data.product_id]
+                        values: [newQuant, salesTotal, data.product_id]
                         },function(err,res){
                             if(err) throw err;
-                            // console.log(res);
                             inquirer.prompt([{
                                 type: 'confirm',
                                 name: 'done_shopping',
@@ -71,7 +72,7 @@ function buyProduct(){
                                 if(data.done_shopping === true){
                                     buyProduct();
                                 }else{
-                                    console.log('Thank you for your purchase of'+purchases+' for $'+totalCost+'. Have a great day :)');
+                                    console.log('Thank you for your purchase of'+purchases+' for $'+decimalCost+'. Have a great day :)');
                                     connection.end();
                                 }
                             });
