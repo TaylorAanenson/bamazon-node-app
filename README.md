@@ -1,4 +1,4 @@
-# Online Marketplace Terminal Application
+# Amazon Esque Terminal Application
 
 ## Customer Interface
 <img src="assets/bamazon-customer.gif" />
