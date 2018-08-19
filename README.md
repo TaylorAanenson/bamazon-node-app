@@ -1,3 +1,10 @@
-# bamazon-node-app
+# Online Marketplace Terminal Application
 
-<iframe src="https://www.youtube.com/watch?v=95M8W1JgH_0" frameborder="0"></iframe>
+## Customer Interface
+<img src="assets/bamazon-customer.gif" />
+
+## Manager Interface
+<img src="assets/bamazon-manager.gif" />
+
+## Supervisor Interface
+<img src="assets/bamazon-supervisor.gif" />
